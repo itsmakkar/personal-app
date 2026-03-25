@@ -6,6 +6,8 @@ import { useDailyLog } from './hooks/useDailyLog'
 import { getISTDateString, getISTDayName, isTimeWithinNextMinutes, nowInIST, timeStringToMinutes } from '../../utils/ist'
 import { useMedicines } from '../medicines/hooks/useMedicines'
 import { useMedicineLogs } from '../medicines/hooks/useMedicineLogs'
+import { useDocuments } from '../documents/hooks/useDocuments'
+import { getFirebaseFunctions, httpsCallable } from '../../firebase/config'
 
 function typeColor(type) {
   const t = (type || '').toLowerCase()
@@ -77,6 +79,7 @@ export default function TodayPage() {
   const navigate = useNavigate()
   const { userProfile } = usePersonalAuth()
   const { loading: timetableLoading, timetable, updateTimetableSlots } = useTimetable()
+  const { uploadAndProcessDocument } = useDocuments()
 
   const todayDateStr = useMemo(() => getISTDateString(nowInIST()), [])
   const dayName = useMemo(() => getISTDayName(nowInIST()), [])
@@ -110,6 +113,107 @@ export default function TodayPage() {
     description: '',
     medicineId: null,
   })
+
+  const [homePlanFile, setHomePlanFile] = useState(null)
+  const [homePlanError, setHomePlanError] = useState('')
+  const [homePlanImporting, setHomePlanImporting] = useState(false)
+
+  function extractJsonArray(text) {
+    const raw = String(text || '').trim()
+    const withoutPrefix = raw.replace(/^From your documents:\s*/i, '').trim()
+    const cleaned = withoutPrefix
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```$/i, '')
+      .trim()
+
+    const start = cleaned.indexOf('[')
+    const end = cleaned.lastIndexOf(']')
+    if (start === -1 || end === -1 || end <= start) return null
+    const slice = cleaned.slice(start, end + 1)
+    try {
+      const parsed = JSON.parse(slice)
+      return parsed
+    } catch {
+      return null
+    }
+  }
+
+  async function handleImportHomePlan() {
+    setHomePlanError('')
+    if (!homePlanFile) {
+      setHomePlanError('Pick a home plan file first.')
+      return
+    }
+    if (!userProfile?.childId) {
+      setHomePlanError('Child is not set yet.')
+      return
+    }
+    const functions = getFirebaseFunctions()
+    if (!functions) {
+      setHomePlanError('Firebase is not configured.')
+      return
+    }
+
+    setHomePlanImporting(true)
+    try {
+      await uploadAndProcessDocument({
+        file: homePlanFile,
+        category: 'home_plan',
+        description: 'Imported OT home plan',
+      })
+
+      const prompt = `You are importing a weekly timetable from an OT-provided home plan document for a child with autism.
+Return ONLY a valid JSON array (no markdown, no explanation). Do NOT prefix the response with any text like "From your documents:".
+
+Each slot object must be:
+{
+  "day": "Monday"|"Tuesday"|"Wednesday"|"Thursday"|"Friday"|"Saturday"|"Sunday",
+  "startTime": "HH:MM",
+  "endTime": "HH:MM",
+  "type": "therapy"|"meal"|"medicine"|"activity"|"school"|"rest"|"other",
+  "title": "string",
+  "description": "string",
+  "medicineId": null,
+  "mealId": null,
+  "fromHomePlan": true
+}
+
+Only include slots where you can extract BOTH startTime and endTime. Use the schedule as written in the document. If no timed schedule exists, return an empty array.`
+
+      const callable = httpsCallable(functions, 'personalChatQuery')
+      const res = await callable({ question: prompt, childId: userProfile.childId })
+      const answer = res?.data?.answer || ''
+      const parsed = extractJsonArray(answer)
+      if (!Array.isArray(parsed)) throw new Error('Could not parse timetable JSON from the assistant.')
+
+      const mapped = parsed
+        .map((s) => ({
+          id: newSlotId(),
+          day: s.day || null,
+          startTime: s.startTime || null,
+          endTime: s.endTime || null,
+          type: s.type || 'activity',
+          title: String(s.title || ''),
+          description: String(s.description || ''),
+          medicineId: s.medicineId || null,
+          mealId: s.mealId || null,
+          fromHomePlan: true,
+        }))
+        .filter((s) => !!s.day && !!s.startTime && !!s.endTime)
+
+      if (!mapped.length) throw new Error('No timed slots found in the imported document.')
+
+      await updateTimetableSlots(mapped)
+      setHomePlanFile(null)
+      setWeeklyEditorOpen(false)
+      setSlotEditId(null)
+    } catch (e) {
+      setHomePlanError(e?.message || 'Import failed')
+    } finally {
+      setHomePlanImporting(false)
+    }
+  }
 
   const dueSoonMedicines = useMemo(() => {
     if (!todaySlots?.length) return []
@@ -368,6 +472,44 @@ export default function TodayPage() {
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 1000, color: '#0f172a' }}>Import from home plan</div>
+              <div style={{ marginTop: 4, fontSize: 13, color: '#64748b', fontWeight: 800 }}>
+                Upload an OT home plan document. We'll extract timed slots and pre-fill your weekly timetable.
+              </div>
+
+              <div style={{ marginTop: 10 }}>
+                <input
+                  type="file"
+                  accept=".pdf,image/*,.txt,text/plain"
+                  disabled={homePlanImporting}
+                  onChange={(e) => setHomePlanFile(e.target.files?.[0] || null)}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              {homePlanError ? <div style={{ marginTop: 10, color: '#dc2626', fontSize: 13 }}>{homePlanError}</div> : null}
+
+              <button
+                style={{
+                  marginTop: 12,
+                  height: 48,
+                  width: '100%',
+                  background: '#0ea5e9',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 12,
+                  fontWeight: 1000,
+                  cursor: homePlanImporting ? 'not-allowed' : 'pointer',
+                  opacity: homePlanImporting ? 0.7 : 1,
+                }}
+                disabled={homePlanImporting || !homePlanFile}
+                onClick={handleImportHomePlan}
+              >
+                {homePlanImporting ? 'Importing...' : 'Import & pre-fill'}
+              </button>
+            </div>
+
             <div style={{ display: 'flex', gap: 10 }}>
               <label style={{ flex: 1, fontSize: 13, color: '#64748b' }}>
                 Day
