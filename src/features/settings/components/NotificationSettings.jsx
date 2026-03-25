@@ -10,11 +10,13 @@ export default function NotificationSettings({ value, onSave, loading }) {
   )
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setMorningEnabled(!!data.morningDigestEnabled)
     setMorningTime(data.morningDigestTime || '07:30')
     setMedicineRemindersEnabled(
       data.medicineRemindersEnabled !== undefined ? !!data.medicineRemindersEnabled : true
     )
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [data.morningDigestEnabled, data.morningDigestTime, data.medicineRemindersEnabled])
 
   async function handleSave() {

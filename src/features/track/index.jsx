@@ -100,7 +100,7 @@ export default function TrackPage() {
       .sort((a, b) => timeStringToMinutes(a.startTime) - timeStringToMinutes(b.startTime))
   }, [timetable?.slots, todayDayName])
 
-  const { dailyLog, markSlotCompletion } = useDailyLog({ dateStr: todayDateStr })
+  const { markSlotCompletion } = useDailyLog({ dateStr: todayDateStr })
   const { medicines, addMedicine } = useMedicines()
   const { statusByKey, setMedicineStatus } = useMedicineLogs({ dateStr: todayDateStr })
 

@@ -3,7 +3,8 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { signInWithCustomToken } from 'firebase/auth'
 import { getFirebaseAuth } from '../../firebase/config'
 import { usePersonalOtp } from './hooks/usePersonalOtp'
-import { usePersonalAuth } from '../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../context/usePersonalAuth'
+import logo from '../../assets/logo.svg'
 
 const inputStyle = {
   width: '100%',
@@ -149,7 +150,10 @@ export default function LoginPage() {
     <div style={{ minHeight: '100svh', background: '#f8fafc', padding: 18 }}>
       <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ textAlign: 'center', marginTop: 10 }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Personal Autism Support</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <img src={logo} alt="Hum Honge Kamyaab" style={{ width: 56, height: 56 }} />
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>Hum Honge Kamyaab</div>
+          </div>
           <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
             WhatsApp OTP login for parents
           </div>

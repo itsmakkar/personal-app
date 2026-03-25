@@ -10,9 +10,11 @@ export default function OtSharingSettings({ value, onSave, loading }) {
   const [sendTime, setSendTime] = useState(data.otScheduleSendTime || '19:00')
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setEnabled(!!data.otScheduleSharingEnabled)
     setSendDay(data.otScheduleSendDay || 'Sunday')
     setSendTime(data.otScheduleSendTime || '19:00')
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [data.otScheduleSharingEnabled, data.otScheduleSendDay, data.otScheduleSendTime])
 
   const dayOptions = useMemo(() => DAYS, [])

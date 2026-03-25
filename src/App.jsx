@@ -1,16 +1,18 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import BottomNav from './components/layout/BottomNav'
 import ProtectedRoute from './components/layout/ProtectedRoute'
-import { PersonalAuthProvider, usePersonalAuth } from './context/PersonalAuthContext'
+import { PersonalAuthProvider } from './context/PersonalAuthContext'
+import { usePersonalAuth } from './context/usePersonalAuth'
 import LoginPage from './features/auth/LoginPage'
 import TodayPage from './features/timetable'
 import TrackPage from './features/track'
 import ChatPage from './features/chatbot'
 import DocumentsPage from './features/documents'
 import SettingsPage from './features/settings'
+import logo from './assets/logo.svg'
 
 function AppInner() {
-  const { loading, userProfile } = usePersonalAuth()
+  const { userProfile } = usePersonalAuth()
 
   return (
     <div
@@ -33,8 +35,9 @@ function AppInner() {
             borderBottom: '1px solid #e2e8f0',
           }}
         >
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>
-            Personal Autism Support
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <img src={logo} alt="Hum Honge Kamyaab" style={{ width: 28, height: 28 }} />
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Hum Honge Kamyaab</div>
           </div>
           <div style={{ marginTop: 4, fontSize: 13, color: '#64748b' }}>
             Calm, structured daily management

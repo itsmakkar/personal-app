@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { getFirebaseFirestore } from '../../../firebase/config'
-import { usePersonalAuth } from '../../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../../context/usePersonalAuth'
 
 export function useDietPlan() {
   const { userProfile } = usePersonalAuth()

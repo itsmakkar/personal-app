@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  arrayRemove,
-  arrayUnion,
   doc,
   getDoc,
   runTransaction,
@@ -10,14 +8,15 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { getFirebaseFirestore } from '../../../firebase/config'
-import { usePersonalAuth } from '../../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../../context/usePersonalAuth'
 import { getISTDateString } from '../../../utils/ist'
 
 export function useDailyLog({ dateStr } = {}) {
   const { userProfile } = usePersonalAuth()
   const firestore = getFirebaseFirestore()
 
-  const effectiveDateStr = dateStr || useMemo(() => getISTDateString(new Date()), [])
+  const todayStr = useMemo(() => getISTDateString(new Date()), [])
+  const effectiveDateStr = dateStr || todayStr
 
   const docId = useMemo(() => {
     if (!userProfile?.childId) return null

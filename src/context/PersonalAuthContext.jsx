@@ -1,49 +1,9 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { arrayUnion, doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { getFirebaseAuth, getFirebaseFirestore } from '../firebase/config'
-
-const PersonalAuthContext = createContext(null)
-
-async function ensurePersonalDocsAfterOtpLogin({ uid, phone, childId }) {
-  const firestore = getFirebaseFirestore()
-  if (!firestore) return
-
-  const userRef = doc(firestore, 'personal_users', uid)
-  await setDoc(
-    userRef,
-    {
-      uid,
-      phone,
-      role: 'personal_parent',
-      childId,
-      createdAt: serverTimestamp(),
-    },
-    { merge: true }
-  )
-
-  // Create/update the personal child document so spouse logins can both write.
-  const childRef = doc(firestore, 'personal_children', childId)
-  const existing = await getDoc(childRef)
-  if (!existing.exists()) {
-    await setDoc(
-      childRef,
-      {
-        childId,
-        parentUids: [uid],
-        createdAt: serverTimestamp(),
-      },
-      { merge: true }
-    )
-    return
-  }
-
-  const existingData = existing.data()
-  const parentUids = Array.isArray(existingData?.parentUids) ? existingData.parentUids : []
-  if (!parentUids.includes(uid)) {
-    await updateDoc(childRef, { parentUids: arrayUnion(uid) })
-  }
-}
+import { ensurePersonalDocsAfterOtpLogin } from './personalAuthHelpers'
+import { PersonalAuthContext } from './personalAuthContextBase'
 
 export function PersonalAuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
@@ -103,10 +63,3 @@ export function PersonalAuthProvider({ children }) {
 
   return <PersonalAuthContext.Provider value={value}>{children}</PersonalAuthContext.Provider>
 }
-
-export function usePersonalAuth() {
-  const ctx = useContext(PersonalAuthContext)
-  if (!ctx) throw new Error('usePersonalAuth must be used within PersonalAuthProvider')
-  return ctx
-}
-

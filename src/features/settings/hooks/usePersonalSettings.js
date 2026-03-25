@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { getFirebaseFirestore } from '../../../firebase/config'
-import { usePersonalAuth } from '../../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../../context/usePersonalAuth'
 
 export function usePersonalSettings() {
   const { userProfile } = usePersonalAuth()

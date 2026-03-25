@@ -10,11 +10,13 @@ export default function ChildProfile({ value, onSave, loading }) {
   const [otTrainerPhone, setOtTrainerPhone] = useState(data.otTrainerPhone || '')
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setChildName(data.childName || '')
     setDateOfBirth(data.dateOfBirth || '')
     setDiagnosis(data.diagnosis || '')
     setOtTrainerName(data.otTrainerName || '')
     setOtTrainerPhone(data.otTrainerPhone || '')
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [data.childName, data.dateOfBirth, data.diagnosis, data.otTrainerName, data.otTrainerPhone])
 
   async function handleSave() {

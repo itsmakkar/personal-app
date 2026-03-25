@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom'
-import { usePersonalAuth } from '../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../context/usePersonalAuth'
 
 export default function ProtectedRoute({ children }) {
   const { loading, userProfile } = usePersonalAuth()

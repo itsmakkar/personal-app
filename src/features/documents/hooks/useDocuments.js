@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { collection, getDocs, query, doc, setDoc, where, serverTimestamp, orderBy, limit } from 'firebase/firestore'
+import { collection, getDocs, query, doc, setDoc, where, serverTimestamp, limit } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { getFirebaseFirestore, getFirebaseStorage, getFirebaseFunctions, httpsCallable } from '../../../firebase/config'
-import { usePersonalAuth } from '../../../context/PersonalAuthContext'
-import { getISTDateString } from '../../../utils/ist'
+import { usePersonalAuth } from '../../../context/usePersonalAuth'
 
 function detectFileType({ file, fileName }) {
   const n = String(fileName || file?.name || '').toLowerCase()

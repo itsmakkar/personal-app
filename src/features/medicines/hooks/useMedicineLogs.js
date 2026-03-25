@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { collection, getDocs, query, where, doc, addDoc, serverTimestamp, updateDoc, getDoc } from 'firebase/firestore'
+import { collection, getDocs, query, where, doc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { getFirebaseFirestore } from '../../../firebase/config'
-import { usePersonalAuth } from '../../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../../context/usePersonalAuth'
 import { getISTDateString } from '../../../utils/ist'
 
 function buildKey(medicineId, scheduledTime) {
@@ -12,7 +12,8 @@ export function useMedicineLogs({ dateStr } = {}) {
   const { userProfile } = usePersonalAuth()
   const firestore = getFirebaseFirestore()
 
-  const effectiveDateStr = dateStr || useMemo(() => getISTDateString(new Date()), [])
+  const todayStr = useMemo(() => getISTDateString(new Date()), [])
+  const effectiveDateStr = dateStr || todayStr
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

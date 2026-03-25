@@ -34,15 +34,6 @@ function badgeStyle({ kind }) {
   }
 }
 
-function escapeAndSplitLines(s) {
-  return String(s || '').split('\n').map((line, idx) => (
-    <span key={idx}>
-      {line}
-      {idx < String(s || '').split('\n').length - 1 ? <br /> : null}
-    </span>
-  ))
-}
-
 export default function ChatbotPage() {
   const { loading, error, history, sendQuestion } = useChat()
   const [question, setQuestion] = useState('')

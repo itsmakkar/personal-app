@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import { collection, getDocs, limit, query, where, doc, setDoc } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
+import { collection, getDocs, limit, query, where } from 'firebase/firestore'
 import { httpsCallable, getFirebaseFirestore, getFirebaseFunctions } from '../../../firebase/config'
-import { usePersonalAuth } from '../../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../../context/usePersonalAuth'
 
 export function useChat() {
   const { userProfile } = usePersonalAuth()

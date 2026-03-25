@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { usePersonalAuth } from '../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../context/usePersonalAuth'
 import { usePersonalSettings } from './hooks/usePersonalSettings'
 import ChildProfile from './components/ChildProfile'
 import OtSharingSettings from './components/OtSharingSettings'

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { usePersonalAuth } from '../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../context/usePersonalAuth'
 import { useTimetable } from './hooks/useTimetable'
 import { useDailyLog } from './hooks/useDailyLog'
 import { getISTDateString, getISTDayName, isTimeWithinNextMinutes, nowInIST, timeStringToMinutes } from '../../utils/ist'

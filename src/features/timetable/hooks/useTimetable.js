@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { getFirebaseFirestore } from '../../../firebase/config'
-import { usePersonalAuth } from '../../../context/PersonalAuthContext'
+import { usePersonalAuth } from '../../../context/usePersonalAuth'
 
 export function useTimetable() {
   const { userProfile } = usePersonalAuth()
@@ -37,7 +37,6 @@ export function useTimetable() {
     }
 
     load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firestore, userProfile?.childId])
 
   async function updateTimetableSlots(slots) {
